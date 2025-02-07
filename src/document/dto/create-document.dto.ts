@@ -1,11 +1,13 @@
-import { IsString, IsDateString, IsOptional, IsBoolean, IsNotEmpty } from 'class-validator';
+import { Type } from 'class-transformer';
+import { IsString, IsOptional, IsBoolean, IsNotEmpty, IsDate } from 'class-validator';
 
 export class CreateDocumentDto {
   @IsString()
   @IsNotEmpty()
   regNumber: string;
 
-  @IsDateString()
+  @IsDate()
+  @Type(() => Date)
   @IsNotEmpty()
   regDate: Date;
 
@@ -14,7 +16,8 @@ export class CreateDocumentDto {
   outgoingNumber?: string;
 
   @IsOptional()
-  @IsDateString()
+  @IsDate()
+  @Type(() => Date)
   outgoingDate?: Date;
 
   @IsOptional()
@@ -34,7 +37,8 @@ export class CreateDocumentDto {
   description?: string;
 
   @IsOptional()
-  @IsDateString()
+  @IsDate()
+  @Type(() => Date)
   dueDate?: Date;
 
   @IsBoolean()

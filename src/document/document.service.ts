@@ -1,7 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { DocumentModel, DocumentEntity } from './document.schema';
+import { CreateDocumentDto } from './dto/create-document.dto';
 
 @Injectable()
 export class DocumentService {
@@ -19,9 +20,16 @@ export class DocumentService {
     return doc;
   }
 
-  async create(data: Partial<DocumentEntity>): Promise<DocumentEntity> {
-    const newDoc = new this.documentModel(data);
-    return newDoc.save();
+  async create(data: CreateDocumentDto): Promise<DocumentEntity> {
+    try {
+      const newDoc = new this.documentModel(data);
+      return await newDoc.save();
+    } catch (error) {
+      if (error.code === 11000) {  // MongoDB duplicate key error
+        throw new BadRequestException('Документ с таким regNumber уже существует');
+      }
+      throw new BadRequestException('Ошибка при создании документа');
+    }
   }
 
   async update(id: string, data: Partial<DocumentEntity>): Promise<DocumentEntity> {
