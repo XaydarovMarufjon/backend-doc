@@ -37,6 +37,9 @@ export class DocumentModel {
 
   @Prop()
   control: boolean;
+
+  @Prop()
+  file?: string; 
 }
 
 export const DocumentSchema = SchemaFactory.createForClass(DocumentModel);

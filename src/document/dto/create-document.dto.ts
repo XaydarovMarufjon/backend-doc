@@ -41,9 +41,15 @@ export class CreateDocumentDto {
   @Type(() => Date)
   dueDate?: Date;
 
+  @IsOptional()
   @IsBoolean()
-  access: boolean;
+  access?: boolean;
 
+  @IsOptional()
   @IsBoolean()
-  control: boolean;
+  control?: boolean;
+
+  @IsOptional()
+  @IsString()
+  file: string;
 }

@@ -1,7 +1,9 @@
-import { Controller, Get, Post, Put, Delete, Param, Body, Logger } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Param, Body, Logger, UploadedFile, UseInterceptors } from '@nestjs/common';
 import { DocumentService } from './document.service';
 import { DocumentEntity } from './document.schema';
 import { CreateDocumentDto } from './dto/create-document.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { Express } from 'express';
 
 @Controller('documents')
 export class DocumentController {
@@ -19,10 +21,17 @@ export class DocumentController {
   }
 
   @Post()
-  async create(@Body() data: CreateDocumentDto): Promise<{ success: boolean; document?: DocumentEntity; message?: string }> {
-    this.logger.log(`Creating document with data: ${JSON.stringify(data)}`);
+  @UseInterceptors(FileInterceptor('file'))
+  async create(
+    @Body() data: CreateDocumentDto,
+    @UploadedFile() file: Express.Multer.File
+  ): Promise<{ success: boolean; document?: DocumentEntity; message?: string }> {
+
+    console.log('Fayl keldi:', file);
+    console.log('Data keldi:', data);
+
     try {
-      const document = await this.documentService.create(data);
+      const document = await this.documentService.create({ ...data, file: file?.path });
       return { success: true, document };
     } catch (error) {
       this.logger.error(`Error creating document: ${error.message}`);
