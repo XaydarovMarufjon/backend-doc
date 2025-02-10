@@ -41,8 +41,18 @@ export class DocumentController {
   
 
   @Put(':id')
-  async update(@Param('id') id: string, @Body() data: Partial<DocumentEntity>): Promise<DocumentEntity> {
-    return this.documentService.update(id, data);
+  @UseInterceptors(FileInterceptor('file')) 
+  async update(
+    @Param('id') id: string,
+    @Body() data: Partial<DocumentEntity>,
+    @UploadedFile() file?: Express.Multer.File
+  ): Promise<DocumentEntity> {
+    const updatedData = {
+      ...data,
+      filePath: file ? file.path : undefined 
+    };
+  
+    return this.documentService.update(id, updatedData);
   }
 
   @Delete(':id')
