@@ -50,6 +50,5 @@ export class CreateDocumentDto {
   control?: boolean;
 
   @IsOptional()
-  @IsString()
-  file: string;
+  file: any;
 }

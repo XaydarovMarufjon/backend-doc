@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Put, Delete, Param, Body, Logger, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Param, Body, Logger, UploadedFile, UseInterceptors, BadRequestException } from '@nestjs/common';
 import { DocumentService } from './document.service';
 import { DocumentEntity } from './document.schema';
 import { CreateDocumentDto } from './dto/create-document.dto';
@@ -8,7 +8,7 @@ import { Express } from 'express';
 @Controller('documents')
 export class DocumentController {
   private readonly logger = new Logger(DocumentController.name);
-  constructor(private readonly documentService: DocumentService) {}
+  constructor(private readonly documentService: DocumentService) { }
 
   @Get()
   async getAll(): Promise<DocumentEntity[]> {
@@ -20,28 +20,46 @@ export class DocumentController {
     return this.documentService.findOne(id);
   }
 
+  // @Post()
+  // @UseInterceptors(FileInterceptor('file'))
+  // async create(
+  //   @Body() data: CreateDocumentDto,
+  //   @UploadedFile() file: Express.Multer.File
+  // ): Promise<{ success: boolean; document?: DocumentEntity; message?: string }> {
+
+  //   console.log('Fayl keldi:', file);
+  //   console.log('Data keldi:', data);
+
+  //   try {
+  //     const document = await this.documentService.create({ ...data, file: file?.path });
+  //     return { success: true, document };
+  //   } catch (error) {
+  //     this.logger.error(`Error creating document: ${error.message}`);
+  //     return { success: false, message: 'Failed to create document' };
+  //   }
+  // }
+
+
   @Post()
-  @UseInterceptors(FileInterceptor('file'))
-  async create(
-    @Body() data: CreateDocumentDto,
-    @UploadedFile() file: Express.Multer.File
-  ): Promise<{ success: boolean; document?: DocumentEntity; message?: string }> {
+@UseInterceptors(FileInterceptor('file'))
+async create(
+  @UploadedFile() file: Express.Multer.File,
+  @Body() data: any
+) {
+  console.log('📥 Kelgan fayl:', file);
+  console.log('📥 Kelgan maʼlumotlar:', data);
 
-    console.log('Fayl keldi:', file);
-    console.log('Data keldi:', data);
-
-    try {
-      const document = await this.documentService.create({ ...data, file: file?.path });
-      return { success: true, document };
-    } catch (error) {
-      this.logger.error(`Error creating document: ${error.message}`);
-      return { success: false, message: 'Failed to create document' };
-    }
+  if (!file) {
+    throw new BadRequestException("❌ Fayl kelmadi yoki noto‘g‘ri nomlangan!");
   }
-  
+
+  return { success: true, message: '✅ Fayl qabul qilindi', file, data };
+}
+
+
 
   @Put(':id')
-  @UseInterceptors(FileInterceptor('file')) 
+  @UseInterceptors(FileInterceptor('file'))
   async update(
     @Param('id') id: string,
     @Body() data: Partial<DocumentEntity>,
@@ -49,9 +67,9 @@ export class DocumentController {
   ): Promise<DocumentEntity> {
     const updatedData = {
       ...data,
-      filePath: file ? file.path : undefined 
+      filePath: file ? file.path : undefined
     };
-  
+
     return this.documentService.update(id, updatedData);
   }
 

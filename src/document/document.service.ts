@@ -21,6 +21,7 @@ export class DocumentService {
   }
 
   async create(data: CreateDocumentDto): Promise<DocumentEntity> {
+    console.log("data" , data);
     try {
       const newDoc = new this.documentModel(data);
       return await newDoc.save();
@@ -33,7 +34,7 @@ export class DocumentService {
   }
 
   async update(id: string, data: Partial<DocumentEntity>): Promise<DocumentEntity> {
-    console.log(id , data);
+    // console.log(id , data);
     
     const updatedDoc = await this.documentModel.findByIdAndUpdate(id, data, { new: true }).exec();
     if (!updatedDoc) throw new NotFoundException('Документ не найден');
@@ -44,4 +45,5 @@ export class DocumentService {
     const result = await this.documentModel.findByIdAndDelete(id).exec();
     if (!result) throw new NotFoundException('Документ не найден');
   }
+  
 }
