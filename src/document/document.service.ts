@@ -21,9 +21,11 @@ export class DocumentService {
   }
 
   async create(data: CreateDocumentDto): Promise<DocumentEntity> {
-    console.log("data" , data);
     try {
+      console.log("malumotlar saqlanishga tayyor", data);
+      
       const newDoc = new this.documentModel(data);
+      console.log("malumotlar saqlandi ", newDoc);
       return await newDoc.save();
     } catch (error) {
       if (error.code === 11000) {  // MongoDB duplicate key error
@@ -34,8 +36,6 @@ export class DocumentService {
   }
 
   async update(id: string, data: Partial<DocumentEntity>): Promise<DocumentEntity> {
-    // console.log(id , data);
-    
     const updatedDoc = await this.documentModel.findByIdAndUpdate(id, data, { new: true }).exec();
     if (!updatedDoc) throw new NotFoundException('Документ не найден');
     return updatedDoc;

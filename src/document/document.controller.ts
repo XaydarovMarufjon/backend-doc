@@ -1,9 +1,12 @@
-import { Controller, Get, Post, Put, Delete, Param, Body, Logger, UploadedFile, UseInterceptors, BadRequestException } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Param, Body, Logger, UploadedFile, UseInterceptors, BadRequestException, Res, NotFoundException } from '@nestjs/common';
 import { DocumentService } from './document.service';
 import { DocumentEntity } from './document.schema';
-import { CreateDocumentDto } from './dto/create-document.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Express } from 'express';
+import { diskStorage } from 'multer';
+import * as path from 'path';
+import * as fs from 'fs';
+import { Response } from 'express';
 
 @Controller('documents')
 export class DocumentController {
@@ -15,63 +18,101 @@ export class DocumentController {
     return this.documentService.findAll();
   }
 
-  @Get(':id')
-  async getOne(@Param('id') id: string): Promise<DocumentEntity> {
-    return this.documentService.findOne(id);
-  }
+// @Post()
+// @UseInterceptors(
+//   FileInterceptor('file'
+//     , {
+//     storage: diskStorage({
+//       destination: './uploads',
+//       filename: (req, file, cb) => {
+//         const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+//         const fileExt = file.originalname.split('.').pop();
+//         cb(null, `document-${uniqueSuffix}.${fileExt}`);
+//       },
+//     }),
+//   }),
+// )
+// async create(
+//   @UploadedFile() file: Express.Multer.File,
+//   @Body() data: any
+// ) {
 
-  // @Post()
-  // @UseInterceptors(FileInterceptor('file'))
-  // async create(
-  //   @Body() data: CreateDocumentDto,
-  //   @UploadedFile() file: Express.Multer.File
-  // ): Promise<{ success: boolean; document?: DocumentEntity; message?: string }> {
-
-  //   console.log('Fayl keldi:', file);
-  //   console.log('Data keldi:', data);
-
-  //   try {
-  //     const document = await this.documentService.create({ ...data, file: file?.path });
-  //     return { success: true, document };
-  //   } catch (error) {
-  //     this.logger.error(`Error creating document: ${error.message}`);
-  //     return { success: false, message: 'Failed to create document' };
-  //   }
-  // }
+//   if (!file) {
+//     throw new BadRequestException("❌ Fayl kelmadi yoki noto‘g‘ri nomlangan!");
+//   }
+   
+//   const newDocument = await this.documentService.create({
+//     ...data, file:file.path
+//   })
+//   return newDocument;
+// }
 
 
-  @Post()
-@UseInterceptors(FileInterceptor('file'))
+@Post()
+@UseInterceptors(FileInterceptor('file', {
+  storage: diskStorage({
+    destination: './uploads',
+    filename: (req, file, cb) => {
+      const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+      const fileExt = file.originalname.split('.').pop();
+      cb(null, `document-${uniqueSuffix}.${fileExt}`);
+    },
+  }),
+}))
 async create(
   @UploadedFile() file: Express.Multer.File,
   @Body() data: any
 ) {
-  console.log('📥 Kelgan fayl:', file);
-  console.log('📥 Kelgan maʼlumotlar:', data);
-
   if (!file) {
-    throw new BadRequestException("❌ Fayl kelmadi yoki noto‘g‘ri nomlangan!");
+    throw new BadRequestException("Файл не прибыл или был назван неправильно!");
   }
 
-  return { success: true, message: '✅ Fayl qabul qilindi', file, data };
+  const fileUrl = `http://localhost:3000/uploads/${file.filename}`; 
+
+  const newDocument = await this.documentService.create({
+    ...data,
+    file: fileUrl 
+  });
+
+  return newDocument;
 }
 
+@Put(':id')
+@UseInterceptors(FileInterceptor('file', {
+  storage: diskStorage({
+    destination: './uploads',
+    filename: (req, file, cb) => {
+      const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+      const fileExt = file.originalname.split('.').pop();
+      cb(null, `document-${uniqueSuffix}.${fileExt}`);
+    },
+  }),
+}))
 
-
-  @Put(':id')
-  @UseInterceptors(FileInterceptor('file'))
-  async update(
-    @Param('id') id: string,
-    @Body() data: Partial<DocumentEntity>,
-    @UploadedFile() file?: Express.Multer.File
-  ): Promise<DocumentEntity> {
-    const updatedData = {
-      ...data,
-      filePath: file ? file.path : undefined
-    };
-
-    return this.documentService.update(id, updatedData);
+async update(
+  @Param('id') id: string,
+  @Body() data: Partial<DocumentEntity>,
+  @UploadedFile() file?: Express.Multer.File
+): Promise<DocumentEntity> {
+  
+  const existingDocument = await this.documentService.findOne(id);
+  if (!existingDocument) {
+    throw new NotFoundException('Документ не найден!')
   }
+
+  let fileUrl = existingDocument.file; 
+
+  if (file) {
+    fileUrl = `http://localhost:3000/uploads/${file.filename}`; 
+  }
+
+  const updatedData = {
+    ...data,
+    file: fileUrl, 
+  };
+
+  return this.documentService.update(id, updatedData);
+}
 
   @Delete(':id')
   async delete(@Param('id') id: string): Promise<{ message: string }> {
