@@ -11,7 +11,7 @@ async function bootstrap() {
   app.use(json()); // JSON request body qo‘llab-quvvatlash
   app.use(urlencoded({ extended: true }))
   app.enableCors({
-    origin: [ 'https://document-registry-cuil.vercel.app', 'http://localhost:4200'], 
+    origin: [ 'https://document-registry-cuil.vercel.app', 'http://localhost:4200' , 'https://document-registry-5w4d9iysd-master-aac0bc3c.vercel.app/'], 
     methods: 'GET,POST,PUT,DELETE,HEAD,PATCH', 
     allowedHeaders: 'Content-Type, Authorization', 
   });
