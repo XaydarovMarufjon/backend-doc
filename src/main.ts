@@ -12,7 +12,7 @@ async function bootstrap() {
   app.use(urlencoded({ extended: true }))
   app.enableCors({
     origin: [ 'https://document-registry-cuil.vercel.app', 'http://localhost:4200'], 
-    methods: 'GET,POST,PUT,DELETE', 
+    methods: 'GET,POST,PUT,DELETE,HEAD,PATCH', 
     allowedHeaders: 'Content-Type, Authorization', 
   });
    app.use('/uploads', express.static(join(__dirname, '..', 'uploads')));
