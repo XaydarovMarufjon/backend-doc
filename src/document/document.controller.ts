@@ -18,36 +18,6 @@ export class DocumentController {
     return this.documentService.findAll();
   }
 
-// @Post()
-// @UseInterceptors(
-//   FileInterceptor('file'
-//     , {
-//     storage: diskStorage({
-//       destination: './uploads',
-//       filename: (req, file, cb) => {
-//         const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-//         const fileExt = file.originalname.split('.').pop();
-//         cb(null, `document-${uniqueSuffix}.${fileExt}`);
-//       },
-//     }),
-//   }),
-// )
-// async create(
-//   @UploadedFile() file: Express.Multer.File,
-//   @Body() data: any
-// ) {
-
-//   if (!file) {
-//     throw new BadRequestException("❌ Fayl kelmadi yoki noto‘g‘ri nomlangan!");
-//   }
-   
-//   const newDocument = await this.documentService.create({
-//     ...data, file:file.path
-//   })
-//   return newDocument;
-// }
-
-
 @Post()
 @UseInterceptors(FileInterceptor('file', {
   storage: diskStorage({

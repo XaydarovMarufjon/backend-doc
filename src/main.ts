@@ -12,9 +12,14 @@ async function bootstrap() {
   app.use(urlencoded({ extended: true }))
   app.enableCors({
     // origin: [ 'https://document-registry.vercel.app', 'http://localhost:4200' ], 
-    origin: '*', 
+    origin: [
+      'http://localhost:4200',
+      'https://document-registry.vercel.app',
+      'https://backend-doc-eight.vercel.app'
+    ],
     methods: 'GET,POST,PUT,DELETE,HEAD,PATCH', 
     allowedHeaders: 'Content-Type, Authorization', 
+    credentials: true
   });
    app.use('/uploads', express.static(join(__dirname, '..', 'uploads')));
   await app.listen(process.env.PORT ?? 3000);
