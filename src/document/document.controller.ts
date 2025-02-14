@@ -37,7 +37,8 @@ async create(
     throw new BadRequestException("Файл не прибыл или был назван неправильно!");
   }
 
-  const fileUrl = `${process.env.BASE_URL || 'http://localhost:3000'}/uploads/${file.filename}`;
+  // const fileUrl = `${process.env.BASE_URL || 'http://localhost:3000'}/uploads/${file.filename}`;
+  const fileUrl = `https://backend-doc-eight.vercel.app/uploads/${file.filename}`;
 
 
   const newDocument = await this.documentService.create({
